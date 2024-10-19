@@ -2,6 +2,7 @@ package main
 
 import (
 	"ClientsManagementBot/pkg/bot"
+	"ClientsManagementBot/pkg/bot/telegram"
 	"log"
 	"os"
 	"time"
@@ -24,25 +25,27 @@ func main() {
 	}
 
 	// Инициализация бота
+	err = bot.InitBot()
+	if err != nil {
+		log.Fatal("Ошибка при инициализации бота:", err)
+	}
+
+	// Инициализация бота Телеграм
 	botInstance, err := telebot.NewBot(telebot.Settings{
 		Token:  botToken,
 		Poller: &telebot.LongPoller{Timeout: 10 * time.Second},
 	})
 	if err != nil {
-		log.Fatal("Ошибка при инициализации бота:", err)
+		log.Fatal("Ошибка при инициализации бота Телеграм:", err)
 	}
 
-	// Подключение клиентских команд
-	botInstance.Handle("/start", bot.StartHandler(botInstance))
+	// Подключаем обработчик для команды /start
+	botInstance.Handle("/start", telegram.StartHandler(botInstance))
 
-	// Подключение административных команд
-	botInstance.Handle("/add_service", bot.AddServiceHandler(botInstance))
-	botInstance.Handle("/list_clients", bot.ListClientsHandler(botInstance))
-	botInstance.Handle("/schedule_update", bot.ScheduleUpdateHandler(botInstance))
-	botInstance.Handle("/list_period", bot.ListClientsByPeriodHandler(botInstance))
-
-	// Обработчик для колбеков
-	botInstance.Handle(telebot.OnCallback, bot.UserRequestHandler(botInstance))
+	// Подключение других административных команд
+	botInstance.Handle("/add_service", telegram.AddServiceHandler(botInstance))
+	botInstance.Handle("/list_clients", telegram.ListClientsHandler(botInstance))
+	botInstance.Handle("/schedule_update", telegram.ScheduleUpdateHandler(botInstance))
 
 	log.Println("Бот запущен и готов к работе...")
 
