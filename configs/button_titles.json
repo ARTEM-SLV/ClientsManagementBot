@@ -1,4 +1,8 @@
 {
+  "btn_menu": "Меню",
+  "btn_back": "Назад",
+  "btn_Schedule": "Расписание",
+  "btn_reports": "Отчеты",
   "btn_services": "Услуги",
   "btn_help": "Помощь"
 }

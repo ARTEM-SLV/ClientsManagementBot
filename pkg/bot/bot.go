@@ -15,13 +15,22 @@ type Messages struct {
 }
 
 type BtnTitles struct {
+	BtnMenu     string `json:"btn_menu"`
+	BtnBack     string `json:"btn_back"`
 	BtnServices string `json:"btn_services"`
 	BtnHelp     string `json:"btn_help"`
+	BtnSchedule string `json:"btn_Schedule"`
+	BtnReports  string `json:"btn_reports"`
 }
 
 var adminID string
 var MessagesList Messages
 var BtnTitlesList BtnTitles
+
+// Проверяем, является ли пользователь администратором
+func IsAdmin(userID int) bool {
+	return adminID == strconv.Itoa(userID)
+}
 
 func InitBot() error {
 	// Получаем ИД администратора
@@ -68,9 +77,4 @@ func loadBtnTitles(filePath string) error {
 	json.Unmarshal(byteValue, &BtnTitlesList)
 
 	return nil
-}
-
-// Проверяем, является ли пользователь администратором
-func IsAdmin(userID int) bool {
-	return adminID == strconv.Itoa(userID)
 }
