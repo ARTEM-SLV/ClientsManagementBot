@@ -1,14 +1,15 @@
 package main
 
 import (
-	"ClientsManagementBot/pkg/bot"
-	"ClientsManagementBot/pkg/bot/telegram"
 	"log"
 	"os"
 	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/tucnak/telebot"
+
+	"ClientsManagementBot/pkg/bot"
+	"ClientsManagementBot/pkg/bot/telegram"
 )
 
 func main() {
