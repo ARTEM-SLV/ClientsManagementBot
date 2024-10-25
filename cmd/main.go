@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ClientsManagementBot/pkg/database"
 	"log"
 	"os"
 	"time"
@@ -13,8 +14,21 @@ import (
 )
 
 func main() {
+	InitLogger()
+
+	dbType := "sqlite" // "sqlite" или "postgres"
+	db, err := database.NewDatabase(dbType)
+	if err != nil {
+		log.Fatalf("Ошибка инициализации базы данных: %v", err)
+	}
+
+	if err := db.Init(); err != nil {
+		log.Fatalf("Ошибка инициализации базы данных: %v", err)
+	}
+	defer db.Close()
+
 	// Загружаем переменные окружения
-	err := godotenv.Load()
+	err = godotenv.Load()
 	if err != nil {
 		log.Fatal("Ошибка загрузки файла .env")
 	}
@@ -52,4 +66,16 @@ func main() {
 
 	// Запуск бота
 	botInstance.Start()
+}
+
+func InitLogger() {
+	// Открываем файл для логов (или создаем, если его нет)
+	file, err := os.OpenFile("bot.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("Ошибка при открытии файла для логов: %v", err)
+	}
+
+	// Настройка логгера для записи в файл
+	log.SetOutput(file)
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 }

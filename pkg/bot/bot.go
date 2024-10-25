@@ -17,10 +17,11 @@ type Messages struct {
 type BtnTitles struct {
 	BtnMenu     string `json:"btn_menu"`
 	BtnBack     string `json:"btn_back"`
-	BtnServices string `json:"btn_services"`
 	BtnHelp     string `json:"btn_help"`
-	BtnSchedule string `json:"btn_Schedule"`
+	BtnServices string `json:"btn_services"`
+	BtnSchedule string `json:"btn_schedule"`
 	BtnReports  string `json:"btn_reports"`
+	BtnSettings string `json:"btn_settings"`
 }
 
 var adminID string
@@ -28,7 +29,7 @@ var MessagesList Messages
 var BtnTitlesList BtnTitles
 
 // Проверяем, является ли пользователь администратором
-func IsAdmin(userID int) bool {
+func IsMaster(userID int) bool {
 	return adminID == strconv.Itoa(userID)
 }
 

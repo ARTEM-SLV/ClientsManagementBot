@@ -2,6 +2,8 @@ package telegram
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/tucnak/telebot"
 
 	"ClientsManagementBot/pkg/bot"
@@ -12,43 +14,24 @@ func StartHandler(b *telebot.Bot) func(*telebot.Message) {
 	return func(m *telebot.Message) {
 		// Создаем клавиатуру с кнопками
 		menu := &telebot.ReplyMarkup{ResizeReplyKeyboard: true}
-		//btnMenu := menu.InlineKeyboard
 
 		// Отправляем приветственное сообщение и отображаем меню
 		var msg string
-		if bot.IsAdmin(m.Sender.ID) {
-			msg = bot.MessagesList.WelcomeAdmin
-			menu.InlineKeyboard = createBtnAdmin(b)
+		if bot.IsMaster(m.Sender.ID) {
+			msg = fmt.Sprintf(bot.MessagesList.WelcomeAdmin, m.Sender.LastName, m.Sender.FirstName)
+			menu.InlineKeyboard = createBtnMaster(b)
 		} else {
 			msg = fmt.Sprintf(bot.MessagesList.WelcomeClient, m.Sender.LastName, m.Sender.FirstName)
 			menu.InlineKeyboard = createBtnClient(b)
 		}
-		b.Send(m.Sender, msg, menu)
+		_, err := b.Send(m.Sender, msg, menu)
+		if err != nil {
+			log.Println("Не удалось отправить приветственное сообщение:", err)
+		}
 	}
 }
 
 func createBtnClient(b *telebot.Bot) [][]telebot.InlineButton {
-	// Создаем кнопки
-	btnServices := telebot.InlineButton{
-		Unique: "btn_services",
-		Text:   bot.BtnTitlesList.BtnServices,
-	}
-	btnHelp := telebot.InlineButton{
-		Unique: "btn_help",
-		Text:   bot.BtnTitlesList.BtnHelp,
-	}
-
-	// Обработчики для кнопок
-	b.Handle(&btnServices, btnServiceFunc)
-	b.Handle(&btnHelp, btnHelpFunc)
-
-	return [][]telebot.InlineButton{
-		{btnServices}, // "Выбор услуги"
-		{btnHelp},     // "Справка"
-	}
-}
-
-func createBtnAdmin(b *telebot.Bot) [][]telebot.InlineButton {
 	// Создаем кнопки
 	btnSchedule := telebot.InlineButton{
 		Unique: "btn_schedule",
@@ -58,9 +41,36 @@ func createBtnAdmin(b *telebot.Bot) [][]telebot.InlineButton {
 		Unique: "btn_services",
 		Text:   bot.BtnTitlesList.BtnServices,
 	}
+	btnHelp := telebot.InlineButton{
+		Unique: "btn_help",
+		Text:   bot.BtnTitlesList.BtnHelp,
+	}
+
+	// Обработчики для кнопок
+	b.Handle(&btnSchedule, btnClientScheduleFunc)
+	b.Handle(&btnServices, btnClientServicesFunc)
+	b.Handle(&btnHelp, btnClientHelpFunc)
+
+	return [][]telebot.InlineButton{
+		{btnSchedule}, // "Расписание"
+		{btnServices}, // "Выбор услуги"
+		{btnHelp},     // "Справка"
+	}
+}
+
+func createBtnMaster(b *telebot.Bot) [][]telebot.InlineButton {
+	// Создаем кнопки
+	btnSchedule := telebot.InlineButton{
+		Unique: "btn_schedule",
+		Text:   bot.BtnTitlesList.BtnSchedule,
+	}
 	btnReports := telebot.InlineButton{
 		Unique: "btn_reports",
 		Text:   bot.BtnTitlesList.BtnReports,
+	}
+	btnSettings := telebot.InlineButton{
+		Unique: "btn_settings",
+		Text:   bot.BtnTitlesList.BtnSettings,
 	}
 	btnHelp := telebot.InlineButton{
 		Unique: "btn_help",
@@ -68,42 +78,15 @@ func createBtnAdmin(b *telebot.Bot) [][]telebot.InlineButton {
 	}
 
 	// Обработчики для кнопок
-	b.Handle(&btnSchedule, btnScheduleFunc)
-	b.Handle(&btnServices, btnServiceFunc)
+	b.Handle(&btnSchedule, btnMasterScheduleFunc)
 	b.Handle(&btnReports, btnReportsFunc)
-	b.Handle(&btnHelp, btnHelpFunc)
+	b.Handle(&btnSettings, btnSettingsFunc)
+	b.Handle(&btnHelp, btnMasterHelpFunc)
 
 	return [][]telebot.InlineButton{
 		{btnSchedule}, // "Расписание"
-		{btnServices}, // "Выбор услуги"
 		{btnReports},  // "Отчеты"
+		{btnSettings}, // "Настройки"
 		{btnHelp},     // "Справка"
-	}
-}
-
-func btnScheduleFunc(b *telebot.Bot) func(*telebot.Message) {
-	return func(m *telebot.Message) {
-		b.Send(m.Sender, "Вы выбрали: Расписание")
-		// Здесь можно добавить логику для отображения списка услуг
-	}
-}
-
-func btnServiceFunc(b *telebot.Bot) func(*telebot.Message) {
-	return func(m *telebot.Message) {
-		b.Send(m.Sender, "Вы выбрали: Выбор услуги")
-		// Здесь можно добавить логику для отображения списка услуг
-	}
-}
-func btnReportsFunc(b *telebot.Bot) func(*telebot.Message) {
-	return func(m *telebot.Message) {
-		b.Send(m.Sender, "Вы выбрали: Отчеты")
-		// Здесь можно добавить логику для отображения списка услуг
-	}
-}
-
-func btnHelpFunc(b *telebot.Bot) func(*telebot.Message) {
-	return func(m *telebot.Message) {
-		b.Send(m.Sender, "Справка: Вы можете выбрать услугу или получить помощь. "+
-			"Для подробностей обращайтесь к администратору.")
 	}
 }
